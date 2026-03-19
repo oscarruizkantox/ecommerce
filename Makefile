@@ -1,4 +1,4 @@
-CONTEXTS = $(shell find domains -maxdepth 1 -mindepth 1 -type d -exec basename {} \;)
+CONTEXTS = $(filter-out crm,$(shell find domains -maxdepth 1 -mindepth 1 -type d -exec basename {} \;))
 
 $(addprefix install-, $(CONTEXTS)):
 	@make -C domains/$(subst install-,,$@) install
@@ -45,8 +45,35 @@ test-infra:
 mutate-infra:
 	@make -C infra mutate
 
-dev:
-	@make -C apps/rails_application dev
+docker-build: ## Build Docker images
+	@docker compose build
+
+dev: ## Start development environment via Docker
+	@docker compose up
+
+dev-detach: ## Start development environment via Docker (detached)
+	@docker compose up -d
+
+dev-down: ## Stop development environment
+	@docker compose down
+
+dev-logs: ## Tail logs from Docker services
+	@docker compose logs -f
+
+dev-console: ## Open Rails console in Docker
+	@docker compose exec web bin/rails console
+
+dev-db-prepare: ## Prepare database in Docker
+	@docker compose exec web bin/rails db:prepare
+
+dev-db-migrate: ## Run migrations in Docker
+	@docker compose exec web bin/rails db:migrate
+
+dev-db-seed: ## Seed database in Docker
+	@docker compose exec web bin/rails db:seed
+
+docker-test: ## Run tests via Docker
+	@docker compose --profile test run --rm test
 
 install: install-infra install-rails install-crm-app install-twitter-app $(addprefix install-, $(CONTEXTS)) ## Install all dependencies
 
@@ -58,3 +85,4 @@ help:
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 .DEFAULT_GOAL := help
+.PHONY: docker-build dev dev-detach dev-down dev-logs dev-console dev-db-prepare dev-db-migrate dev-db-seed docker-test
