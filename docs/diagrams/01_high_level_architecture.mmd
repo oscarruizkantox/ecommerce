@@ -1,0 +1,41 @@
+graph TB
+    subgraph Apps["Delivery Layer (Apps)"]
+        RA["rails_application<br/><i>Full Monolith</i><br/>PostgreSQL"]
+        CRM_APP["crm app<br/><i>Standalone CRM</i><br/>PostgreSQL"]
+        PC_APP["pricing_catalog app<br/><i>Catalog & Pricing</i><br/>SQLite"]
+        TODO_APP["todo_mvc app<br/><i>Demo App</i><br/>PostgreSQL"]
+    end
+
+    subgraph Infra["Shared Infrastructure"]
+        INF["infra gem<br/>EventStore / CommandBus<br/>AggregateRootRepository"]
+    end
+
+    subgraph Domains["Domain Layer (Bounded Contexts)"]
+        AUTH[Authentication]
+        COMM[Communication]
+        CRM_D[CRM]
+        FULF[Fulfillment]
+        INV[Inventory]
+        INVC[Invoicing]
+        ORD[Ordering]
+        PAY[Payments]
+        PRC[Pricing]
+        PC[ProductCatalog]
+        SHIP[Shipping]
+        STOR[Stores]
+        TAX[Taxes]
+        TODO_D[Todo]
+    end
+
+    RA --> AUTH & COMM & CRM_D & FULF & INV & INVC & ORD & PAY & PRC & PC & SHIP & STOR & TAX
+    CRM_APP --> CRM_D
+    PC_APP --> PRC & PC
+    TODO_APP --> TODO_D
+
+    AUTH & COMM & CRM_D & FULF & INV & INVC & ORD & PAY & PRC & PC & SHIP & STOR & TAX & TODO_D --> INF
+
+    style RA fill:#4A90D9,color:#fff
+    style CRM_APP fill:#7B68EE,color:#fff
+    style PC_APP fill:#7B68EE,color:#fff
+    style TODO_APP fill:#7B68EE,color:#fff
+    style INF fill:#FF8C00,color:#fff

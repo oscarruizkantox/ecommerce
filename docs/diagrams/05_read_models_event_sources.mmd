@@ -1,0 +1,68 @@
+graph LR
+    subgraph DomainEvents["Domain Events"]
+        DE_PRC["Pricing Events"]
+        DE_FULF["Fulfillment Events"]
+        DE_CRM["Crm Events"]
+        DE_PC["ProductCatalog Events"]
+        DE_INV["Inventory Events"]
+        DE_STOR["Stores Events"]
+        DE_AUTH["Authentication Events"]
+        DE_COMM["Communication Events"]
+        DE_INVC["Invoicing Events"]
+        DE_SHIP["Shipping Events"]
+        DE_TAX["Taxes Events"]
+        DE_ORD["Ordering Events"]
+        DE_PROC["Processes Events"]
+    end
+
+    subgraph ReadModels["Read Models (rails_application)"]
+        RM_ORD["Orders"]
+        RM_CO["ClientOrders"]
+        RM_OH["OrderHeader"]
+        RM_DEAL["Deals"]
+        RM_CUST["Customers"]
+        RM_PROD["Products"]
+        RM_PO["PublicOffer"]
+        RM_INV["Invoices"]
+        RM_SHIP["Shipments"]
+        RM_RET["Returns"]
+        RM_COUP["Coupons"]
+        RM_TP["TimePromotions"]
+        RM_VAT["VatRates"]
+        RM_AVAIL["Availability"]
+        RM_ADMIN["Admin"]
+        RM_CAUTH["ClientAuth"]
+        RM_INBOX["ClientInbox"]
+    end
+
+    DE_PRC --> RM_ORD & RM_CO & RM_DEAL & RM_PO & RM_COUP & RM_TP & RM_OH & RM_PROD
+    DE_FULF --> RM_ORD & RM_CO & RM_DEAL & RM_CUST & RM_INV & RM_SHIP & RM_RET & RM_OH
+    DE_CRM --> RM_ORD & RM_CO & RM_DEAL & RM_CUST & RM_OH
+    DE_PC --> RM_ORD & RM_CO & RM_PROD & RM_PO
+    DE_INV --> RM_PROD & RM_CO & RM_AVAIL
+    DE_STOR --> RM_ORD & RM_DEAL & RM_CUST & RM_PROD & RM_PO & RM_INV & RM_SHIP & RM_COUP & RM_TP & RM_VAT & RM_ADMIN & RM_OH
+    DE_AUTH --> RM_CUST & RM_CAUTH
+    DE_COMM --> RM_INBOX
+    DE_INVC --> RM_INV & RM_OH
+    DE_SHIP --> RM_SHIP & RM_OH
+    DE_TAX --> RM_PROD & RM_VAT
+    DE_ORD --> RM_RET
+    DE_PROC --> RM_ORD & RM_CO & RM_DEAL
+
+    style RM_ORD fill:#3498DB,color:#fff
+    style RM_CO fill:#3498DB,color:#fff
+    style RM_OH fill:#3498DB,color:#fff
+    style RM_DEAL fill:#E74C3C,color:#fff
+    style RM_CUST fill:#E74C3C,color:#fff
+    style RM_PROD fill:#2ECC71,color:#fff
+    style RM_PO fill:#2ECC71,color:#fff
+    style RM_INV fill:#F39C12,color:#fff
+    style RM_SHIP fill:#1ABC9C,color:#fff
+    style RM_RET fill:#9B59B6,color:#fff
+    style RM_COUP fill:#E67E22,color:#fff
+    style RM_TP fill:#E67E22,color:#fff
+    style RM_VAT fill:#8E44AD,color:#fff
+    style RM_AVAIL fill:#27AE60,color:#fff
+    style RM_ADMIN fill:#34495E,color:#fff
+    style RM_CAUTH fill:#95A5A6,color:#fff
+    style RM_INBOX fill:#D35400,color:#fff

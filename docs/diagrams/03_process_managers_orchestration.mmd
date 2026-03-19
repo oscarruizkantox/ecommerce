@@ -1,0 +1,112 @@
+graph LR
+    subgraph Events["Published Events"]
+        E_PIA["Pricing::<br/>PriceItemAdded"]
+        E_PIR["Pricing::<br/>PriceItemRemoved"]
+        E_PDS["Pricing::<br/>PercentageDiscountSet"]
+        E_PDC["Pricing::<br/>PercentageDiscountChanged"]
+        E_PDR["Pricing::<br/>PercentageDiscountRemoved"]
+        E_PMF["Pricing::<br/>ProductMadeFreeForOrder"]
+        E_FPR["Pricing::<br/>FreeProductRemovedFromOrder"]
+        E_OA["Pricing::<br/>OfferAccepted"]
+        E_OE["Pricing::<br/>OfferExpired"]
+        E_CU["Pricing::<br/>CouponUsed"]
+        E_PC["Payments::<br/>PaymentCaptured"]
+        E_PA["Payments::<br/>PaymentAuthorized"]
+        E_PR["Payments::<br/>PaymentReleased"]
+        E_FR["Fulfillment::<br/>OrderRegistered"]
+        E_FC["Fulfillment::<br/>OrderConfirmed"]
+        E_FX["Fulfillment::<br/>OrderCancelled"]
+        E_CR["Crm::<br/>CustomerRegistered"]
+        E_PN["ProductCatalog::<br/>ProductNamed"]
+        E_TV["Processes::<br/>TotalOrderValueUpdated"]
+        E_SA["Shipping::<br/>AddressAdded"]
+        E_SO["Stores::<br/>OfferRegistered"]
+    end
+
+    subgraph Processes["Process Managers"]
+        P_TOV["TotalOrderValue"]
+        P_ATP["ApplyTimePromotion"]
+        P_3P1["ThreePlusOneFree"]
+        P_COU["CouponDiscountProcess"]
+        P_RES["ReservationProcess"]
+        P_NPA["NotifyPayments<br/>AboutOrderValue"]
+        P_COP["ConfirmOrder<br/>OnPaymentCaptured"]
+        P_RPO["ReleasePayment<br/>OnOrderExpiration"]
+        P_SHP["ShipmentProcess"]
+        P_SSP["SyncShipment<br/>FromPricing"]
+        P_INV["InvoiceGeneration"]
+        P_WEL["WelcomeMessage<br/>Process"]
+        P_PNS["ProductNameSync"]
+        P_IPD["InvoicePaymentDate"]
+    end
+
+    subgraph Commands["Issued Commands"]
+        C_STD["Pricing::SetTimePromotionDiscount"]
+        C_RTD["Pricing::RemoveTimePromotionDiscount"]
+        C_MPF["Pricing::MakeProductFreeForOrder"]
+        C_RFP["Pricing::RemoveFreeProductFromOrder"]
+        C_SPD["Pricing::SetPercentageDiscount"]
+        C_RES["Inventory::Reserve"]
+        C_REL["Inventory::Release"]
+        C_DIS["Inventory::Dispatch"]
+        C_RO["Fulfillment::RegisterOrder"]
+        C_RJ["Pricing::RejectOffer"]
+        C_SPA["Payments::SetPaymentAmount"]
+        C_CO["Fulfillment::ConfirmOrder"]
+        C_RP["Payments::ReleasePayment"]
+        C_RS["Stores::RegisterShipment"]
+        C_SS["Shipping::SubmitShipment"]
+        C_AS["Shipping::AuthorizeShipment"]
+        C_AIS["Shipping::AddItemToShipmentPickingList"]
+        C_RIS["Shipping::RemoveItemFromShipmentPickingList"]
+        C_RI["Stores::RegisterInvoice"]
+        C_AII["Invoicing::AddInvoiceItem"]
+        C_SM["Communication::SendMessage"]
+        C_SPN["Invoicing::SetProductNameDisplayedOnInvoice"]
+        C_SPD2["Invoicing::SetPaymentDate"]
+    end
+
+    E_PIA & E_PIR & E_PDS & E_PDC & E_PDR --> P_TOV
+    E_PIA & E_PIR & E_PDS & E_PDC & E_PDR & E_PMF & E_FPR --> P_ATP
+    E_PIA & E_PIR & E_PMF & E_FPR --> P_3P1
+    E_CU --> P_COU
+    E_OA & E_FX & E_FC --> P_RES
+    E_TV --> P_NPA
+    E_PC --> P_COP
+    E_PA & E_PR & E_FR & E_OE & E_FC --> P_RPO
+    E_SA & E_FR & E_FC & E_SO --> P_SHP
+    E_PIA & E_PIR --> P_SSP
+    E_TV & E_FR & E_SO --> P_INV
+    E_CR --> P_WEL
+    E_PN --> P_PNS
+    E_FC --> P_IPD
+
+    P_TOV -.->|publishes| E_TV
+    P_ATP --> C_STD & C_RTD
+    P_3P1 --> C_MPF & C_RFP
+    P_COU --> C_SPD
+    P_RES --> C_RES & C_REL & C_DIS & C_RO & C_RJ
+    P_NPA --> C_SPA
+    P_COP --> C_CO
+    P_RPO --> C_RP
+    P_SHP --> C_RS & C_SS & C_AS
+    P_SSP --> C_AIS & C_RIS
+    P_INV --> C_RI & C_AII
+    P_WEL --> C_SM
+    P_PNS --> C_SPN
+    P_IPD --> C_SPD2
+
+    style P_TOV fill:#E74C3C,color:#fff
+    style P_ATP fill:#E74C3C,color:#fff
+    style P_3P1 fill:#E74C3C,color:#fff
+    style P_COU fill:#E74C3C,color:#fff
+    style P_RES fill:#E74C3C,color:#fff
+    style P_NPA fill:#E74C3C,color:#fff
+    style P_COP fill:#E74C3C,color:#fff
+    style P_RPO fill:#E74C3C,color:#fff
+    style P_SHP fill:#E74C3C,color:#fff
+    style P_SSP fill:#E74C3C,color:#fff
+    style P_INV fill:#E74C3C,color:#fff
+    style P_WEL fill:#E74C3C,color:#fff
+    style P_PNS fill:#E74C3C,color:#fff
+    style P_IPD fill:#E74C3C,color:#fff

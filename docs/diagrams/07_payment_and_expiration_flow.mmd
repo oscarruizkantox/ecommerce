@@ -1,0 +1,54 @@
+stateDiagram-v2
+    [*] --> OfferDrafted: DraftOffer
+
+    state "Building Order" as building {
+        OfferDrafted --> ItemsAdded: AddPriceItem
+        ItemsAdded --> DiscountsApplied: Auto promotions
+        DiscountsApplied --> TotalCalculated: TotalOrderValue
+    }
+
+    TotalCalculated --> PaymentAmountSet: NotifyPaymentsAboutOrderValue
+
+    state "Accepting Offer" as accepting {
+        PaymentAmountSet --> OfferAccepted: AcceptOffer
+        OfferAccepted --> StockReserved: ReservationProcess → Reserve
+        StockReserved --> OrderRegistered: ReservationProcess → RegisterOrder
+    }
+
+    state reject_fork <<choice>>
+    OfferAccepted --> reject_fork: Stock check
+    reject_fork --> OfferRejected: Insufficient stock
+    reject_fork --> StockReserved: Stock available
+
+    OfferRejected --> [*]
+
+    state "Payment" as payment {
+        OrderRegistered --> PaymentAuthorized: AuthorizePayment
+        PaymentAuthorized --> PaymentCaptured: CapturePayment
+    }
+
+    state expiration_fork <<choice>>
+    PaymentAuthorized --> expiration_fork: Time check
+    expiration_fork --> OfferExpired: Timeout
+    expiration_fork --> PaymentCaptured: In time
+
+    OfferExpired --> PaymentReleased: ReleasePaymentOnOrderExpiration
+    PaymentReleased --> [*]
+
+    PaymentCaptured --> OrderConfirmed: ConfirmOrderOnPaymentCaptured
+
+    state "Post-Confirmation" as post {
+        OrderConfirmed --> StockDispatched: ReservationProcess → Dispatch
+        OrderConfirmed --> ShipmentSubmitted: ShipmentProcess
+        OrderConfirmed --> InvoiceGenerated: InvoiceGeneration
+    }
+
+    StockDispatched --> [*]
+    ShipmentSubmitted --> [*]
+    InvoiceGenerated --> [*]
+
+    state "Cancellation Path" as cancel {
+        OrderRegistered --> OrderCancelled: CancelOrder
+        OrderCancelled --> StockReleased: ReservationProcess → Release
+    }
+    StockReleased --> [*]

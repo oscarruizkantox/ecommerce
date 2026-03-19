@@ -1,0 +1,55 @@
+graph TB
+    subgraph ProductSetup["Product Setup"]
+        PC["ProductCatalog<br/><i>ProductRegistered</i><br/><i>ProductNamed</i>"]
+        PRC["Pricing<br/><i>PriceSet, OfferDrafted</i><br/><i>PriceItemAdded/Removed</i><br/><i>DiscountSet/Changed/Removed</i><br/><i>CouponRegistered/Used</i><br/><i>TimePromotionCreated</i><br/><i>OfferAccepted/Rejected/Expired</i>"]
+        TAX["Taxes<br/><i>VatRateSet</i><br/><i>AvailableVatRateAdded/Removed</i>"]
+    end
+
+    subgraph OrderFlow["Order Lifecycle"]
+        FULF["Fulfillment<br/><i>OrderRegistered</i><br/><i>OrderConfirmed</i><br/><i>OrderCancelled</i>"]
+        PAY["Payments<br/><i>PaymentAmountSet</i><br/><i>PaymentAuthorized</i><br/><i>PaymentCaptured</i><br/><i>PaymentReleased</i>"]
+        INV["Inventory<br/><i>StockReserved/Released</i><br/><i>StockLevelChanged</i><br/><i>AvailabilityChanged</i>"]
+        ORD["Ordering<br/><i>DraftReturnCreated</i><br/><i>ItemAdded/RemovedToReturn</i>"]
+    end
+
+    subgraph PostOrder["Post-Order"]
+        SHIP["Shipping<br/><i>ItemAdded/Removed</i><br/><i>AddressAdded</i><br/><i>ShipmentSubmitted</i><br/><i>ShipmentAuthorized</i>"]
+        INVC["Invoicing<br/><i>InvoiceItemAdded</i><br/><i>InvoiceIssued</i><br/><i>BillingAddressSet</i>"]
+    end
+
+    subgraph People["People & Communication"]
+        CRM["CRM<br/><i>CustomerRegistered</i><br/><i>CustomerPromotedToVip</i><br/><i>CustomerAssignedToOrder</i>"]
+        AUTH["Authentication<br/><i>AccountRegistered</i><br/><i>LoginSet, PasswordHashSet</i><br/><i>AccountConnectedToClient</i>"]
+        COMM["Communication<br/><i>MessageSent</i><br/><i>MessageRead</i>"]
+    end
+
+    subgraph MultiTenancy["Multi-Tenancy"]
+        STOR["Stores<br/><i>StoreRegistered/Named</i><br/><i>Product/Customer/Offer</i><br/><i>registered to store</i>"]
+    end
+
+    PRC -->|"OfferAccepted<br/>→ Reserve stock<br/>→ RegisterOrder"| FULF
+    PRC -->|"OfferAccepted<br/>→ Reserve"| INV
+    PRC -->|"PriceItemAdded<br/>→ Sync picking list"| SHIP
+    PRC -->|"TotalOrderValue<br/>→ SetPaymentAmount"| PAY
+    PAY -->|"PaymentCaptured<br/>→ ConfirmOrder"| FULF
+    FULF -->|"OrderConfirmed<br/>→ Dispatch stock"| INV
+    FULF -->|"OrderConfirmed<br/>→ SubmitShipment"| SHIP
+    FULF -->|"OrderRegistered<br/>→ AddInvoiceItem"| INVC
+    FULF -->|"OrderCancelled<br/>→ Release stock"| INV
+    PRC -->|"OfferExpired<br/>→ ReleasePayment"| PAY
+    CRM -->|"CustomerRegistered<br/>→ SendMessage"| COMM
+    PC -->|"ProductNamed<br/>→ SetNameOnInvoice"| INVC
+
+    style PRC fill:#3498DB,color:#fff
+    style FULF fill:#2ECC71,color:#fff
+    style PAY fill:#E67E22,color:#fff
+    style INV fill:#9B59B6,color:#fff
+    style SHIP fill:#1ABC9C,color:#fff
+    style INVC fill:#F39C12,color:#fff
+    style CRM fill:#E74C3C,color:#fff
+    style AUTH fill:#95A5A6,color:#fff
+    style COMM fill:#D35400,color:#fff
+    style PC fill:#2980B9,color:#fff
+    style TAX fill:#8E44AD,color:#fff
+    style ORD fill:#27AE60,color:#fff
+    style STOR fill:#34495E,color:#fff

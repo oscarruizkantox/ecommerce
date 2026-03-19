@@ -1,0 +1,52 @@
+sequenceDiagram
+    participant UI as User/Controller
+    participant PRC as Pricing
+    participant PROC as Process Managers
+    participant INV as Inventory
+    participant FULF as Fulfillment
+    participant PAY as Payments
+    participant SHIP as Shipping
+    participant INVC as Invoicing
+    participant STOR as Stores
+
+    Note over UI,STOR: 1. Draft & Build Order
+    UI->>PRC: DraftOffer
+    PRC-->>PRC: OfferDrafted
+    UI->>PRC: AddPriceItem (per product)
+    PRC-->>PRC: PriceItemAdded
+    PRC-->>PROC: TotalOrderValue calculates total
+    PROC-->>PROC: TotalOrderValueUpdated
+    PROC-->>PAY: SetPaymentAmount
+
+    Note over UI,STOR: 2. Promotions (automatic)
+    PRC-->>PROC: PriceItemAdded triggers
+    PROC->>PRC: SetTimePromotionDiscount (ApplyTimePromotion)
+    PROC->>PRC: MakeProductFreeForOrder (ThreePlusOneFree)
+
+    Note over UI,STOR: 3. Accept Offer & Reserve Stock
+    UI->>PRC: AcceptOffer
+    PRC-->>PRC: OfferAccepted
+    PRC-->>PROC: ReservationProcess triggered
+    PROC->>INV: Reserve (per product)
+    PROC->>FULF: RegisterOrder
+
+    Note over UI,STOR: 4. Payment
+    UI->>PAY: AuthorizePayment
+    PAY-->>PAY: PaymentAuthorized
+    UI->>PAY: CapturePayment
+    PAY-->>PAY: PaymentCaptured
+    PAY-->>PROC: ConfirmOrderOnPaymentCaptured
+    PROC->>FULF: ConfirmOrder
+
+    Note over UI,STOR: 5. Fulfill & Ship
+    FULF-->>FULF: OrderConfirmed
+    FULF-->>PROC: ReservationProcess dispatches
+    PROC->>INV: Dispatch (per product)
+    FULF-->>PROC: ShipmentProcess triggered
+    PROC->>SHIP: SubmitShipment
+    PROC->>SHIP: AuthorizeShipment
+
+    Note over UI,STOR: 6. Invoice
+    FULF-->>PROC: InvoiceGeneration triggered
+    PROC->>STOR: RegisterInvoice
+    PROC->>INVC: AddInvoiceItem (per product)

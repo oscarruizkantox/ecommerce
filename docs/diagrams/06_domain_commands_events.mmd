@@ -1,0 +1,98 @@
+graph TB
+    subgraph Authentication
+        direction TB
+        A_CMD["Commands:<br/>RegisterAccount<br/>SetLogin<br/>SetPasswordHash<br/>ConnectAccountToClient"]
+        A_EVT["Events:<br/>AccountRegistered<br/>LoginSet<br/>PasswordHashSet<br/>AccountConnectedToClient"]
+        A_CMD --> A_EVT
+    end
+
+    subgraph ProductCatalog
+        direction TB
+        PC_CMD["Commands:<br/>RegisterProduct<br/>NameProduct"]
+        PC_EVT["Events:<br/>ProductRegistered<br/>ProductNamed"]
+        PC_CMD --> PC_EVT
+    end
+
+    subgraph Pricing
+        direction TB
+        P_CMD["Commands:<br/>DraftOffer / AcceptOffer / RejectOffer / ExpireOffer<br/>AddPriceItem / RemovePriceItem<br/>SetPrice / SetFuturePrice<br/>SetPercentageDiscount / ChangePercentageDiscount / RemovePercentageDiscount<br/>RegisterCoupon / UseCoupon<br/>CreateTimePromotion<br/>SetTimePromotionDiscount / RemoveTimePromotionDiscount<br/>MakeProductFreeForOrder / RemoveFreeProductFromOrder"]
+        P_EVT["Events:<br/>OfferDrafted / OfferAccepted / OfferRejected / OfferExpired<br/>PriceItemAdded / PriceItemRemoved<br/>PriceSet<br/>PercentageDiscountSet / PercentageDiscountChanged / PercentageDiscountRemoved<br/>CouponRegistered / CouponUsed<br/>TimePromotionCreated<br/>ProductMadeFreeForOrder / FreeProductRemovedFromOrder"]
+        P_CMD --> P_EVT
+    end
+
+    subgraph CRM
+        direction TB
+        C_CMD["Commands:<br/>RegisterCustomer / PromoteCustomerToVip / AssignCustomerToOrder<br/>RegisterContact / SetContactEmail / SetContactPhone / SetContactLinkedinUrl<br/>RegisterCompany / SetCompanyLinkedinUrl<br/>CreatePipeline / AddStageToPipeline / RemoveStageFromPipeline<br/>CreateDeal / SetDealValue / SetDealExpectedCloseDate / MoveDealToStage"]
+        C_EVT["Events:<br/>CustomerRegistered / CustomerPromotedToVip / CustomerAssignedToOrder<br/>ContactRegistered / ContactEmailSet / ContactPhoneSet / ContactLinkedinUrlSet<br/>CompanyRegistered / CompanyLinkedinUrlSet<br/>PipelineCreated / StageAddedToPipeline / StageRemovedFromPipeline<br/>DealCreated / DealValueSet / DealExpectedCloseDateSet / DealMovedToStage"]
+        C_CMD --> C_EVT
+    end
+
+    subgraph Fulfillment
+        direction TB
+        F_CMD["Commands:<br/>RegisterOrder<br/>ConfirmOrder<br/>CancelOrder"]
+        F_EVT["Events:<br/>OrderRegistered<br/>OrderConfirmed<br/>OrderCancelled"]
+        F_CMD --> F_EVT
+    end
+
+    subgraph Inventory
+        direction TB
+        I_CMD["Commands:<br/>Reserve / Release<br/>Supply / Dispatch"]
+        I_EVT["Events:<br/>StockReserved / StockReleased<br/>StockLevelChanged<br/>AvailabilityChanged"]
+        I_CMD --> I_EVT
+    end
+
+    subgraph Payments
+        direction TB
+        PY_CMD["Commands:<br/>SetPaymentAmount<br/>AuthorizePayment<br/>CapturePayment<br/>ReleasePayment"]
+        PY_EVT["Events:<br/>PaymentAmountSet<br/>PaymentAuthorized<br/>PaymentCaptured<br/>PaymentReleased"]
+        PY_CMD --> PY_EVT
+    end
+
+    subgraph Invoicing
+        direction TB
+        IV_CMD["Commands:<br/>AddInvoiceItem / IssueInvoice<br/>SetPaymentDate / SetBillingAddress<br/>SetProductNameDisplayedOnInvoice"]
+        IV_EVT["Events:<br/>InvoiceItemAdded / InvoiceIssued<br/>InvoicePaymentDateSet / BillingAddressSet<br/>ProductNameDisplayedSet"]
+        IV_CMD --> IV_EVT
+    end
+
+    subgraph Shipping
+        direction TB
+        SH_CMD["Commands:<br/>AddItemToShipmentPickingList<br/>RemoveItemFromShipmentPickingList<br/>AddShippingAddressToShipment<br/>SubmitShipment / AuthorizeShipment"]
+        SH_EVT["Events:<br/>ItemAddedToShipmentPickingList<br/>ItemRemovedFromShipmentPickingList<br/>ShippingAddressAddedToShipment<br/>ShipmentSubmitted / ShipmentAuthorized"]
+        SH_CMD --> SH_EVT
+    end
+
+    subgraph Ordering
+        direction TB
+        O_CMD["Commands:<br/>CreateDraftReturn<br/>AddItemToReturn<br/>RemoveItemFromReturn"]
+        O_EVT["Events:<br/>DraftReturnCreated<br/>ItemAddedToReturn<br/>ItemRemovedFromReturn"]
+        O_CMD --> O_EVT
+    end
+
+    subgraph Stores
+        direction TB
+        ST_CMD["Commands:<br/>RegisterStore / NameStore<br/>RegisterProduct / RegisterCustomer<br/>RegisterOffer / RegisterInvoice<br/>RegisterShipment / RegisterCoupon<br/>RegisterTimePromotion / RegisterVatRate"]
+        ST_EVT["Events:<br/>StoreRegistered / StoreNamed<br/>ProductRegistered / CustomerRegistered<br/>OfferRegistered / InvoiceRegistered<br/>ShipmentRegistered / CouponRegistered<br/>TimePromotionRegistered / VatRateRegistered"]
+        ST_CMD --> ST_EVT
+    end
+
+    subgraph Taxes
+        direction TB
+        T_CMD["Commands:<br/>SetVatRate<br/>AddAvailableVatRate<br/>RemoveAvailableVatRate"]
+        T_EVT["Events:<br/>VatRateSet<br/>AvailableVatRateAdded<br/>AvailableVatRateRemoved"]
+        T_CMD --> T_EVT
+    end
+
+    subgraph Communication
+        direction TB
+        CM_CMD["Commands:<br/>SendMessage<br/>ReadMessage"]
+        CM_EVT["Events:<br/>MessageSent<br/>MessageRead"]
+        CM_CMD --> CM_EVT
+    end
+
+    subgraph Todo
+        direction TB
+        TD_CMD["Commands:<br/>AddTodo / SetTodoDescription<br/>UpdateTodoDescription<br/>CompleteTodo / UncompleteTodo<br/>ClearTodo"]
+        TD_EVT["Events:<br/>TodoAdded / TodoDescriptionSet<br/>TodoDescriptionUpdated<br/>TodoCompleted / TodoUncompleted<br/>TodoCleared"]
+        TD_CMD --> TD_EVT
+    end
