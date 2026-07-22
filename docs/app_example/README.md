@@ -47,6 +47,10 @@ extraction is chosen** — not a starting point and not an obligation.
    identically. Contract-first, polyglot naming (stem `flow`), the per-ecosystem
    package/module mapping table, and the shared conformance suite that keeps the
    implementations twins.
+7. **[data-archival.md](./data-archival.md)** — keep the operational database small
+   and fast by tiering old, settled data to cold storage (S3/Glacier) without
+   losing it: time partitioning (detach vs delete), copy-verify-remove batches,
+   preserving order/identity, and restore/query models.
 
 ## Suggested reading order
 
