@@ -11,6 +11,16 @@ The app is three Rails-free process types sharing one boot file:
 - **consumer** — Kicks (RabbitMQ): ingress, hands off to Sidekiq.
 - **worker** — Sidekiq: runs the event store flow and async subscribers.
 
+## Guiding principle: keep it in one place until extraction is justified
+
+**Everything lives inside the same repository / app / service until two or more
+services actually need the shared logic.** Extraction (a shared gem, a
+language-neutral contract, a monorepo) is **never mandatory — not even at 3 or 4
+services**; a count of consumers only makes it *possible*, not required. If the
+coordination cost (versioning, releases, ownership) isn't worth it, keeping the
+code in-app is a valid choice. Docs 5 and 6 describe the **target shape if and when
+extraction is chosen** — not a starting point and not an obligation.
+
 ## Documents
 
 1. **[running-res-without-rails.md](./running-res-without-rails.md)** — the core:
