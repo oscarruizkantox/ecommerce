@@ -47,7 +47,12 @@ extraction is chosen** — not a starting point and not an obligation.
    identically. Contract-first, polyglot naming (stem `flow`), the per-ecosystem
    package/module mapping table, and the shared conformance suite that keeps the
    implementations twins.
-7. **[data-archival.md](./data-archival.md)** — keep the operational database small
+7. **[data-contracts.md](./data-contracts.md)** — community standards and
+   conventions for API objects and event schemas: Convention over Configuration,
+   OpenAPI / JSON Schema / JSON:API / RFC 9457, CloudEvents / AsyncAPI / Protobuf /
+   Avro, data contract specs (ODCS), and the field conventions (dates, money, ids,
+   versioning) to adopt.
+8. **[data-archival.md](./data-archival.md)** — keep the operational database small
    and fast by tiering old, settled data to cold storage without losing it: time
    partitioning (detach vs delete), copy-verify-remove batches, preserving
    order/identity, and restore/query models. **Adopted decision:** the cold tier is
