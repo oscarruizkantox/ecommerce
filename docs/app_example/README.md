@@ -32,6 +32,11 @@ The app is three Rails-free process types sharing one boot file:
    common HTTP contract (response format, error mapping, JWT) across many services
    via a framework-neutral gem, without leaking any service's controllers or
    config into it.
+6. **[cross-language-contract.md](./cross-language-contract.md)** — the contract
+   is not Ruby-only: Ruby and Elixir (and maybe Java) services must respond
+   identically. Contract-first, polyglot naming (stem `flow`), the per-ecosystem
+   package/module mapping table, and the shared conformance suite that keeps the
+   implementations twins.
 
 ## Suggested reading order
 
