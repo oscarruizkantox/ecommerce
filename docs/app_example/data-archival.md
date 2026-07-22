@@ -16,12 +16,19 @@ needs online.
 
 ## Interim design (before the lakehouse is ready)
 
+> **DECISION (adopted): the cold tier is Apache Parquet on S3** — columnar,
+> compressed (Snappy/ZSTD), Hive-partitioned, with a manifest table. Chosen because
+> it is small and cheap, directly queryable, and already the lakehouse's substrate,
+> so migrating later is *registering* the data, not reprocessing it. A separate
+> archive RDS is explicitly rejected (lock-in → second migration). JSONL is a
+> fallback only if something must ship today.
+
 The lakehouse is the eventual home, but it isn't ready and has no date. So pick the
 **simplest interim that is already the lakehouse's substrate** — then migrating is
 *registering* the data, not moving or reprocessing it.
 
-**Choice: S3 + Parquet, Hive-partitioned, plus a small manifest table.** This is
-exactly what a lakehouse (Iceberg/Delta on S3, read by Athena/Spark/Trino/Databricks/
+**S3 + Parquet, Hive-partitioned, plus a small manifest table.** This is exactly
+what a lakehouse (Iceberg/Delta on S3, read by Athena/Spark/Trino/Databricks/
 Snowflake) sits on. Nothing here is throwaway.
 
 ```
