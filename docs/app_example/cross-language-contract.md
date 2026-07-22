@@ -7,6 +7,21 @@ so the shared thing cannot be "a gem". The model is **contract-first, polyglot**
 one language-neutral contract as the source of truth, plus twin implementations
 per language, kept identical by a shared conformance suite.
 
+## When this applies (not yet)
+
+**Until there are two or more services that require extracting the logic,
+everything lives inside the same repository / app / service.** This contract-first,
+polyglot structure is the **target** for when a second real consumer (Ruby or
+Elixir) exists — not a starting point. With a single service, keep the response
+format, envelope, and claims as plain in-app code.
+
+**And even with 3 or 4 services, extraction stays optional.** A count of consumers
+makes a shared contract *possible*, never mandatory. If the team decides the
+coordination cost isn't worth it, keeping the format in-app (or lightly
+duplicated) is a valid choice. Formalize the neutral contract and split into
+`contracts/` + per-language libraries only when a twin implementation is actually
+wanted and the shared surface has proven stable.
+
 ## Model
 
 ```

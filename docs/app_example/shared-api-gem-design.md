@@ -9,6 +9,25 @@ Fits the topology in [infrastructure.md](./infrastructure.md) and reuses the
 propagation model from
 [message-metadata-contract.md](./message-metadata-contract.md).
 
+## When to extract (do this last, not first)
+
+**Until there are two or more services that actually need the shared logic,
+everything lives inside the same repository / app / service.** Do not extract a
+gem (or the contract, or the monorepo) on day one for a single service — that is
+premature abstraction.
+
+**Extraction is never mandatory — not even at 3 or 4 services.** Having several
+consumers only *makes it possible* to extract; it does not force it. If the team
+prefers to keep the shared code in-app (or lightly duplicated) because the cost of
+a shared library — versioning, releases, coordination, ownership — isn't worth it
+yet, that is a legitimate choice. Extract only when the shared surface is both
+**proven by real consumers** and **worth the coordination overhead**. Extracting
+later from working services is cheap and better-informed; guessing the shared
+surface up front is not.
+
+This whole guide describes the **target shape if and when extraction is chosen** —
+not a starting point and not an obligation.
+
 ## Principle: dependency inversion
 
 ```
