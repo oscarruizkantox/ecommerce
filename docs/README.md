@@ -16,7 +16,7 @@ order.
 - [app_example/observability-otel.md](./app_example/observability-otel.md) — OpenTelemetry traces/metrics/logs and trace propagation
 - [app_example/shared-api-gem-design.md](./app_example/shared-api-gem-design.md) — sharing the common HTTP contract via a framework-neutral gem
 - [app_example/cross-language-contract.md](./app_example/cross-language-contract.md) — contract-first, polyglot (Ruby/Elixir/Java), naming (`flow`), conformance
-- [app_example/data-archival.md](./app_example/data-archival.md) — tiering old data to cold storage to keep the hot DB small and fast (includes the Parquet-on-S3 flow diagram)
+- [app_example/data-archival.md](./app_example/data-archival.md) — archiving old data to Parquet on S3 (cold storage) to keep the hot DB small and fast; includes the flow diagram
 
 ## Architecture diagrams
 
