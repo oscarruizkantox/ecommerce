@@ -27,7 +27,8 @@ event handlers is one trace.
 
 ## Resource attributes (every signal)
 
-- `service.name` = `app-web` | `app-consumer` | `app-worker`
+- `service.name` = `<service>-web` | `<service>-consumer` | `<service>-worker`
+  (per service; the three processes of one service share the `<service>` stem)
 - `service.version` (build revision), `deployment.environment` (staging … prod),
   `cloud.account.id`, `host`, `service.namespace` = the app/bounded context.
 

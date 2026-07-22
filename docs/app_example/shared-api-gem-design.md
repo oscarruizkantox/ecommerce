@@ -53,7 +53,7 @@ domain concept?"* If yes → gem. If no → service.
 ### 1. Response format — a pure object, knows nothing about apps
 
 ```ruby
-module Platform
+module Flow
   module Api
     class Response
       def self.success(data, status: 200, meta: {})
@@ -71,7 +71,7 @@ end
 ### 2. A mixin the service includes in its controller (not a base class)
 
 ```ruby
-module Platform
+module Flow
   module Api
     module Respondable
       def respond(data, status: 200, meta: {})
@@ -102,7 +102,7 @@ plain-Ruby Rack, Sinatra, and Rails alike. **Config comes from the app at mount
 time**, never from inside the gem:
 
 ```ruby
-use Platform::Api::JwtMiddleware, public_key: ENV.fetch("JWT_PUBLIC_KEY")
+use Flow::Api::JwtMiddleware, public_key: ENV.fetch("JWT_PUBLIC_KEY")
 ```
 
 ## What stays in each service
@@ -111,7 +111,7 @@ Its own controllers, which only *use* the gem's pieces:
 
 ```ruby
 class OrdersController < Sinatra::Base
-  include Platform::Api::Respondable            # from the gem
+  include Flow::Api::Respondable            # from the gem
 
   post "/" do
     result = COMMAND_BUS.(PlaceOrder.new(params))   # the service's logic
