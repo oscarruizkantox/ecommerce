@@ -17,6 +17,7 @@ order.
 - [app_example/shared-api-gem-design.md](./app_example/shared-api-gem-design.md) — sharing the common HTTP contract via a framework-neutral gem
 - [app_example/cross-language-contract.md](./app_example/cross-language-contract.md) — contract-first, polyglot (Ruby/Elixir/Java), naming (`flow`), conformance
 - [app_example/data-archival.md](./app_example/data-archival.md) — tiering old data to cold storage to keep the hot DB small and fast
+- [app_example/data-archival-flow.mmd](./app_example/data-archival-flow.mmd) — diagram of the Parquet-on-S3 archival flow (also embedded in data-archival.md)
 
 ## Architecture diagrams
 
