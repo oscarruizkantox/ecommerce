@@ -28,6 +28,58 @@ makes services consistent from day one, long before any formal schema exists.
 | **HAL** / **JSON-LD + Hydra** | hypermedia link formats | if you want HATEOAS/linked data |
 | **GraphQL** | typed schema + query language | an alternative to REST when clients need flexible querying |
 
+### The two candidates for our resource shape
+
+We narrowed the resource representation to two options, using the same `Order`
+(id, status, total 42.00 EUR, created_at, a customer relationship).
+
+**Option A — house envelope** (flat, minimal): the object goes straight in `data`,
+with `meta` for cross-cutting fields.
+
+```json
+{
+  "data": {
+    "id": "ord_9f2a",
+    "status": "paid",
+    "total": { "amount_minor": 4200, "currency": "EUR" },
+    "created_at": "2026-07-22T10:00:00Z",
+    "customer_id": "cus_1a2b"
+  },
+  "meta": { "request_id": "req_77" }
+}
+```
+
+**Option B — JSON:API (RECOMMENDED)**: a complete convention — separates
+`type`/`id`/`attributes`/`relationships`/`links`, standardizes how related
+resources are referenced and navigated, plus ready-made rules for pagination,
+sparse fieldsets, and errors.
+
+```json
+{
+  "data": {
+    "type": "orders",
+    "id": "ord_9f2a",
+    "attributes": {
+      "status": "paid",
+      "total": { "amount_minor": 4200, "currency": "EUR" },
+      "created_at": "2026-07-22T10:00:00Z"
+    },
+    "relationships": {
+      "customer": { "data": { "type": "customers", "id": "cus_1a2b" } }
+    },
+    "links": { "self": "/orders/ord_9f2a" }
+  }
+}
+```
+
+> **Decision (recommended): JSON:API.** It is Convention over Configuration in a
+> box — relationships, pagination, sparse fieldsets, and error shape are already
+> specified, so services don't re-invent them and clients/tooling understand the
+> format out of the box. The cost is more verbosity than the house envelope; the
+> gain is a shared, documented convention across every service and language.
+> Choose the flat house envelope only if a service needs maximally lightweight
+> payloads and doesn't benefit from JSON:API's relationship/navigation machinery.
+
 ## Event & messaging standards
 
 | Standard | What it is | Use for |
@@ -74,9 +126,9 @@ Community-standard building blocks — no need to invent:
 
 Compose established standards rather than a bespoke house style:
 
-- **HTTP responses** → house envelope over **JSON Schema**, errors as **RFC 9457
-  problem+json**. (Optionally full **JSON:API** if you want its ready-made
-  conventions.)
+- **HTTP responses** → **JSON:API** (recommended; see the two candidates above),
+  validated with **JSON Schema**, errors as **RFC 9457 problem+json**. The flat
+  house envelope is the fallback for services that need lightweight payloads.
 - **API description** → **OpenAPI**.
 - **Event envelope** → **CloudEvents** shape, carried in the RabbitMQ/RES metadata
   (aligns with [message-metadata-contract.md](./message-metadata-contract.md)).
