@@ -424,6 +424,12 @@ Rails:
 > only for streams whose lifecycle is genuinely finished and whose events no
 > read model will ever need to replay.
 
+> **Prune vs archive.** This section covers *pruning* — deleting data you may
+> truly drop. To keep the hot database small and fast while **keeping** the
+> history, use *archival* instead (move settled data to Parquet on S3, then remove
+> it from the hot DB) — see [data-archival.md](./data-archival.md). Prune only what
+> no longer needs to exist anywhere; archive what must be retained.
+
 There is no built-in TTL. You prune with a scheduled job that deletes rows
 directly through the gem's ActiveRecord models. "Completed" is a
 domain concept RES doesn't track, so you decide it — e.g. a stream is complete
