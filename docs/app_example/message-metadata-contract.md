@@ -5,6 +5,11 @@ transport, the RubyEventStore event log, and OpenTelemetry trace context. The
 goal is that a single external request is traceable and correlatable end to end,
 and that no service has to guess which fields are present.
 
+> The event envelope maps onto the **CloudEvents** standard shape (`id`, `source`,
+> `type`, `time`, `subject`, `data`) — the adopted event-envelope standard in
+> [data-contracts.md](./data-contracts.md). The identity/correlation fields below
+> are the concrete carriers of those CloudEvents attributes across AMQP and RES.
+
 ## Why this exists (current state)
 
 Two reference apps, two different gaps:

@@ -49,7 +49,7 @@ with `meta` for cross-cutting fields.
 }
 ```
 
-**Option B — JSON:API (RECOMMENDED)**: a complete convention — separates
+**Option B — JSON:API (ADOPTED)**: a complete convention — separates
 `type`/`id`/`attributes`/`relationships`/`links`, standardizes how related
 resources are referenced and navigated, plus ready-made rules for pagination,
 sparse fieldsets, and errors.
@@ -72,13 +72,14 @@ sparse fieldsets, and errors.
 }
 ```
 
-> **Decision (recommended): JSON:API.** It is Convention over Configuration in a
+> **DECISION (adopted): JSON:API.** It is Convention over Configuration in a
 > box — relationships, pagination, sparse fieldsets, and error shape are already
 > specified, so services don't re-invent them and clients/tooling understand the
 > format out of the box. The cost is more verbosity than the house envelope; the
 > gain is a shared, documented convention across every service and language.
-> Choose the flat house envelope only if a service needs maximally lightweight
-> payloads and doesn't benefit from JSON:API's relationship/navigation machinery.
+> The flat house envelope is a fallback only for a service that needs maximally
+> lightweight payloads and doesn't benefit from JSON:API's relationship/navigation
+> machinery.
 
 ## Event & messaging standards
 

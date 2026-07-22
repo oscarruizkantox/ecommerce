@@ -52,16 +52,22 @@ domain concept?"* If yes → gem. If no → service.
 
 ### 1. Response format — a pure object, knows nothing about apps
 
+> The **wire format is JSON:API**, with errors as **RFC 9457 problem+json** — the
+> adopted decision in [data-contracts.md](./data-contracts.md). The snippet below
+> is a **simplified illustration of the mechanism** (a pure formatter object); the
+> real `Response` emits the JSON:API `data`/`attributes`/`relationships` shape and
+> problem+json errors.
+
 ```ruby
 module Flow
   module Api
     class Response
       def self.success(data, status: 200, meta: {})
-        [status, JSON.generate({ data: data, meta: meta })]
+        [status, JSON.generate({ data: data, meta: meta })]   # illustrative; real shape = JSON:API
       end
 
       def self.error(code:, message:, status:, details: [])
-        [status, JSON.generate({ error: { code:, message:, details: } })]
+        [status, JSON.generate({ error: { code:, message:, details: } })]  # real shape = RFC 9457
       end
     end
   end
