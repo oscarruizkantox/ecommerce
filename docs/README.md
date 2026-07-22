@@ -6,18 +6,18 @@ Index of everything under `docs/`.
 
 Design docs for running an event-sourced app without Rails (RubyEventStore on
 Postgres, Rack web + RabbitMQ/Sidekiq processes, AWS, OpenTelemetry). See the
-[section README](./app_example/README.md) for the guiding principle and reading
-order.
+[section README](./app_example/README.md) for the guiding principle
+(keep it in one place until extraction is justified) and reading order.
 
 - [app_example/README.md](./app_example/README.md) — overview, guiding principle, reading order
-- [app_example/running-res-without-rails.md](./app_example/running-res-without-rails.md) — RES on Postgres, streams, handlers, Kicks → Sidekiq, Rack, retention
-- [app_example/message-metadata-contract.md](./app_example/message-metadata-contract.md) — metadata across AMQP ↔ RES ↔ OpenTelemetry
-- [app_example/infrastructure.md](./app_example/infrastructure.md) — AWS/Terraform, ECS vs EKS, per-service autoscaling, security
-- [app_example/observability-otel.md](./app_example/observability-otel.md) — OpenTelemetry traces/metrics/logs and trace propagation
-- [app_example/shared-api-gem-design.md](./app_example/shared-api-gem-design.md) — sharing the common HTTP contract via a framework-neutral gem
-- [app_example/cross-language-contract.md](./app_example/cross-language-contract.md) — contract-first, polyglot (Ruby/Elixir/Java), naming (`flow`), conformance
-- [app_example/data-contracts.md](./app_example/data-contracts.md) — community standards (OpenAPI, JSON Schema, CloudEvents, Protobuf, ODCS) and field conventions for API objects and events
-- [app_example/data-archival.md](./app_example/data-archival.md) — archiving old data to Parquet on S3 (cold storage) to keep the hot DB small and fast; includes the flow diagram
+1. [app_example/running-res-without-rails.md](./app_example/running-res-without-rails.md) — RES on Postgres, streams, sync/async handlers, Kicks → Sidekiq, Rack web, prune vs archive
+2. [app_example/message-metadata-contract.md](./app_example/message-metadata-contract.md) — metadata across AMQP ↔ RES ↔ OpenTelemetry (maps to CloudEvents)
+3. [app_example/infrastructure.md](./app_example/infrastructure.md) — AWS/Terraform, ECS vs EKS, per-service independent autoscaling, security
+4. [app_example/observability-otel.md](./app_example/observability-otel.md) — OpenTelemetry traces/metrics/logs and end-to-end trace propagation
+5. [app_example/shared-api-gem-design.md](./app_example/shared-api-gem-design.md) — sharing the common HTTP contract via a framework-neutral gem (extraction is optional)
+6. [app_example/cross-language-contract.md](./app_example/cross-language-contract.md) — contract-first, polyglot (Ruby/Elixir/Java), naming (stem `flow`), conformance
+7. [app_example/data-contracts.md](./app_example/data-contracts.md) — community standards (OpenAPI, JSON Schema, CloudEvents, Protobuf, ODCS) + field conventions; **adopted: JSON:API**
+8. [app_example/data-archival.md](./app_example/data-archival.md) — tiering old data to cold storage to keep the hot DB small and fast; **adopted: Apache Parquet on S3** (includes flow diagram)
 
 ## Architecture diagrams
 
