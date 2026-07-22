@@ -28,6 +28,10 @@ The app is three Rails-free process types sharing one boot file:
    design: traces, metrics, and logs across the three processes, end-to-end trace
    propagation, and wiring into the Kantox stack (VictoriaMetrics / Loki /
    Grafana).
+5. **[shared-api-gem-design.md](./shared-api-gem-design.md)** — how to share the
+   common HTTP contract (response format, error mapping, JWT) across many services
+   via a framework-neutral gem, without leaking any service's controllers or
+   config into it.
 
 ## Suggested reading order
 
