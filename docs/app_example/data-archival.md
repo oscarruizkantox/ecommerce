@@ -72,6 +72,45 @@ For an event store, **S3 as serialized event batches** (preserving `event_id`,
 `stream`, `global_position`, `data`, `metadata`) is the usual default — cheap,
 durable, and re-ingestable.
 
+## File format: Apache Parquet (recommended for the S3 tier)
+
+Store archived events as **Apache Parquet** — columnar, compressed, and the native
+format of the Apache/AWS analytics stack:
+
+- **Small & cheap**: columnar + compression (Snappy/ZSTD) typically shrinks event
+  data several-fold vs JSON → lower S3 cost and faster scans.
+- **Directly queryable** (see below) without restoring to a database.
+- **Schema-friendly**: keep a stable columnar schema and put the variable parts
+  (`data`, `metadata`) as **JSON string columns** (queryable with JSON functions)
+  — avoids a per-event-type schema explosion while staying analyzable.
+
+Alternatives: **JSONL** (simplest, best for faithful re-ingest/replay, no schema
+work, but bigger and slower to scan); **Avro** (row-oriented, strong schema
+evolution — good for streaming pipelines). A common split: **JSONL for
+replay-fidelity restore + Parquet for analytics**, or Parquet only if the JSON
+columns preserve full fidelity.
+
+### Table format on top: Iceberg / Delta Lake (optional)
+
+For an archive that keeps growing and gets queried, an **open table format**
+(**Apache Iceberg** or **Delta Lake**) over the Parquet files adds ACID appends,
+**schema evolution**, **time-travel**, and painless compaction. AWS Athena, Glue,
+EMR/Spark and Trino all read them. Use it if the archive becomes a real analytics
+asset; skip it if it's pure cold retention.
+
+### Layout — partition for cheap scans
+
+Hive-style partitioning so queries prune by time/type and only scan what they need:
+
+```
+s3://flow-archive/events/
+  event_type=OrderPlaced/year=2024/month=01/part-0001.parquet
+  event_type=OrderPaid/year=2024/month=01/part-0002.parquet
+```
+
+Watch the **small-files problem**: write reasonably large Parquet files (128 MB–1 GB)
+or **compact** periodically — thousands of tiny files kill scan performance and cost.
+
 ## Preserving order and identity (RES specifics)
 
 - Archive **`event_id`, `stream`, `global_position`/`id`, `data`, `metadata`** so a
@@ -84,16 +123,30 @@ durable, and re-ingestable.
   events`. If you only archive **fully completed** streams, snapshots aren't
   needed.
 
-## Restoring / reading archived data
+## Reading archived data — yes, and several ways
 
-Decide and document the access model:
+Parquet-on-S3 is readable **without restoring to a database**:
 
-- **Restore on demand**: re-ingest a batch from S3 back into hot (or a temporary
-  restore DB) to replay/inspect. Slow but complete.
-- **Query in place**: Athena/Glue over the S3 batches for analytics without
-  touching the operational DB.
-- Make explicit that **archived streams are not online-replayable** by the live
-  service until restored — so no read model or command path may depend on them.
+| Tool | How | Best for |
+|---|---|---|
+| **AWS Athena** | serverless SQL over S3 (Glue Data Catalog); `SELECT … WHERE event_type=…` | ad-hoc queries, reporting, no infra |
+| **DuckDB** | `SELECT * FROM read_parquet('s3://flow-archive/…')` — embedded, reads S3 directly | on-demand analysis from a laptop/job, very fast, cheap |
+| **Spark / EMR / Trino** | distributed jobs | large-scale reprocessing / backfills |
+| **Re-ingest to Postgres** | read Parquet → replay into a scratch/hot DB | full event replay / rebuilding a projection |
+
+Two distinct access modes — decide and document which you support:
+
+- **Query in place** (Athena/DuckDB) for analytics and inspection, without touching
+  the operational DB. Reads the JSON `data`/`metadata` columns with SQL JSON
+  functions.
+- **Restore on demand**: re-ingest a batch back into a DB to *replay* it through the
+  event store. Slower but gives full event-sourcing semantics.
+
+Make explicit that **archived streams are not online-replayable** by the live
+service until restored — so no read model or command path may depend on them.
+
+Cataloging: register the S3 dataset in the **AWS Glue Data Catalog** (a crawler or
+an explicit table) so Athena/Trino/Spark all see the same schema and partitions.
 
 ## Operational notes
 
@@ -106,6 +159,34 @@ Decide and document the access model:
   (`VACUUM`/`pg_repack`); with partitioning this is unnecessary.
 - Track metrics: hot table size, rows archived, archive lag, restore time — feed
   them into the observability stack ([observability-otel.md](./observability-otel.md)).
+
+## Policies (S3 lifecycle, immutability, security, compliance)
+
+- **Storage-class lifecycle**: S3 lifecycle rules transition objects by age —
+  Standard → Standard-IA → Glacier → Glacier Deep Archive — matching access
+  frequency to cost. Recent archive stays queryable; very old moves to the cheapest
+  (slow-restore) tiers.
+- **Immutability (WORM)**: enable **S3 Object Lock** (compliance/governance mode)
+  so archived events can't be altered or deleted before a retention date — enforces
+  the append-only, source-of-truth guarantee and satisfies audit/regulatory holds.
+- **Retention & legal hold**: set a retention period per the compliance requirement
+  (e.g. N years for financial data); legal holds override lifecycle expiry.
+- **Encryption**: SSE-KMS at rest, TLS in transit; a dedicated KMS key for the
+  archive with tight key policies.
+- **Access control**: least-privilege IAM — archival job can **write**, analysts
+  can **read** via Athena, almost nobody can **delete**. Separate the archive bucket
+  from operational buckets.
+- **GDPR / right-to-erasure vs WORM**: hard deletes conflict with Object Lock. Use
+  **crypto-shredding** — encrypt per-subject data with a per-subject key and destroy
+  the key to render it unreadable — instead of deleting locked objects. Design this
+  in if personal data may be archived.
+- **Cost controls**: partition pruning + compaction keep Athena scan costs down
+  (Athena bills per TB scanned); columnar Parquet + partitions is what makes this
+  cheap.
+- **Catalog & schema versioning**: version the archive schema; if event shapes
+  evolve, an Iceberg/Delta table or a schema field keeps old and new readable.
+- **Verification & audit**: store checksums/manifests per batch; periodically verify
+  restorability (a restore drill) — an archive you can't restore is not a backup.
 
 ## Applies only once it's worth it
 
