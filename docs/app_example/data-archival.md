@@ -14,6 +14,55 @@ An event store is **append-only and the source of truth**. Archived data must st
 rewriting it. Never move data you cannot restore or that a live read model still
 needs online.
 
+## Interim design (before the lakehouse is ready)
+
+The lakehouse is the eventual home, but it isn't ready and has no date. So pick the
+**simplest interim that is already the lakehouse's substrate** — then migrating is
+*registering* the data, not moving or reprocessing it.
+
+**Choice: S3 + Parquet, Hive-partitioned, plus a small manifest table.** This is
+exactly what a lakehouse (Iceberg/Delta on S3, read by Athena/Spark/Trino/Databricks/
+Snowflake) sits on. Nothing here is throwaway.
+
+```
+s3://flow-archive/events/event_type=<T>/year=<Y>/month=<M>/part-*.parquet
+```
+
+Each file carries full-fidelity columns so any future engine can reconstruct the
+history: `event_id`, `stream`, `global_position`, `event_type`, `created_at`,
+`data` (JSON string), `metadata` (JSON string).
+
+**The flow now:**
+1. Archival job writes settled events to S3 as Parquet (copy).
+2. Verify (row count + checksum).
+3. **Delete** those rows from the hot DB — these data *are* being removed from the
+   operational database (that's the point: smaller, faster hot DB).
+4. Record the batch in a **manifest table** (stream, position range, S3 path,
+   checksum, archived_at). This small table is the durable source of truth for
+   "what was moved and where" — independent of any query engine.
+
+**Querying in the interim (mechanism kept swappable, TBD):** the app only *writes*
+and records the manifest; it does **not** bake in a reader. Read the Parquet with
+**DuckDB** (`read_parquet('s3://…')` — zero infra, run from a job/laptop) or
+**Athena** (serverless SQL) as needed. Because reading is decoupled, you can change
+or add engines without touching the archival path.
+
+**Migration to the lakehouse later = near-zero data movement:** the files are
+already open Parquet in an open layout. When the lakehouse is ready you either
+**register** the existing S3 prefix as an Iceberg/Delta table (a metadata
+operation) or do a one-time `CREATE TABLE AS SELECT`. The manifest tells you
+exactly what to onboard. No re-export, no format conversion.
+
+**What to avoid for the interim:** a separate archive **RDS/Postgres**. It's tempting
+(same tooling) but it's *lock-in* — a database is not the lakehouse substrate, so
+later you'd have to export and convert. Choosing S3+Parquet now avoids that second
+migration entirely.
+
+> If you want the absolute minimum first step, write **JSONL** instead of Parquet
+> (no schema work, trivially re-ingestable) and convert to Parquet before/at
+> lakehouse onboarding. Parquet is only slightly more effort now and skips that
+> conversion, so prefer it unless you need to ship today.
+
 ## What is safe to move
 
 Only data that is **settled and no longer needed for online operation**:
