@@ -27,6 +27,43 @@ The lakehouse is the eventual home, but it isn't ready and has no date. So pick 
 **simplest interim that is already the lakehouse's substrate** — then migrating is
 *registering* the data, not moving or reprocessing it.
 
+Flow (source: [data-archival-flow.mmd](./data-archival-flow.mmd)):
+
+```mermaid
+flowchart TB
+    subgraph HOT["Hot tier — operational database (Postgres)"]
+        ES[("event_store_events<br/>event_store_events_in_streams")]
+        MAN[("archive_manifest<br/>stream, position range, S3 path, checksum")]
+    end
+
+    JOB["Archival job<br/>(Sidekiq periodic, off-peak, unique)"]
+
+    subgraph COLD["Cold tier — Apache Parquet on S3 (adopted)"]
+        S3[("s3://flow-archive/events/<br/>event_type=T/year=Y/month=M/part-*.parquet<br/>columnar · Snappy/ZSTD · Hive-partitioned")]
+        LOCK["S3 Object Lock (WORM)<br/>lifecycle: Standard → IA → Glacier"]
+    end
+
+    ES -->|"1 select settled events"| JOB
+    JOB -->|"2 write Parquet"| S3
+    JOB -->|"3 verify count + checksum"| S3
+    JOB -->|"4 delete archived rows (txn)"| ES
+    JOB -->|"5 record batch"| MAN
+
+    subgraph READ["Query — interim (reader decoupled)"]
+        DUCK["DuckDB read_parquet('s3://…')"]
+        ATHENA["AWS Athena (Glue Catalog)"]
+    end
+    S3 --> DUCK
+    S3 --> ATHENA
+
+    RESTORE["Restore on demand<br/>re-ingest → scratch DB → replay"]
+    S3 -.-> RESTORE
+
+    LAKE["Data Lakehouse (future)<br/>register S3 as Iceberg/Delta"]
+    S3 ==>|"migrate later: register, not move"| LAKE
+    MAN -.->|"tells what to onboard"| LAKE
+```
+
 **S3 + Parquet, Hive-partitioned, plus a small manifest table.** This is exactly
 what a lakehouse (Iceberg/Delta on S3, read by Athena/Spark/Trino/Databricks/
 Snowflake) sits on. Nothing here is throwaway.

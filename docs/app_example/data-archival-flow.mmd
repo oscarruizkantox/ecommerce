@@ -1,0 +1,33 @@
+flowchart TB
+    subgraph HOT["Hot tier — operational database (Postgres)"]
+        ES[("event_store_events\nevent_store_events_in_streams")]
+        MAN[("archive_manifest\nstream, position range, S3 path, checksum")]
+    end
+
+    JOB["Archival job\n(Sidekiq periodic, off-peak, unique)"]
+
+    subgraph COLD["Cold tier — Apache Parquet on S3 (adopted)"]
+        direction TB
+        S3[("s3://flow-archive/events/\nevent_type=T/year=Y/month=M/part-*.parquet\ncolumnar · Snappy/ZSTD · Hive-partitioned")]
+        LOCK["S3 Object Lock (WORM)\nlifecycle: Standard → IA → Glacier"]
+    end
+
+    ES -->|"1 select settled events\n(completed streams past cutoff)"| JOB
+    JOB -->|"2 write Parquet\n(event_id, stream, global_position,\ntype, created_at, data/metadata JSON)"| S3
+    JOB -->|"3 verify\nrow count + checksum"| S3
+    JOB -->|"4 delete archived rows\n(transaction: links then events)"| ES
+    JOB -->|"5 record batch"| MAN
+
+    subgraph READ["Query — interim (reader decoupled, swappable)"]
+        DUCK["DuckDB\nread_parquet('s3://…')"]
+        ATHENA["AWS Athena\nserverless SQL (Glue Catalog)"]
+    end
+    S3 --> DUCK
+    S3 --> ATHENA
+
+    RESTORE["Restore on demand\nre-ingest → scratch DB → replay"]
+    S3 -.->|"full event-sourcing semantics"| RESTORE
+
+    LAKE["Data Lakehouse (future)\nregister S3 as Iceberg/Delta\n= metadata op, no reprocessing"]
+    S3 ==>|"migrate later:\nregister, not move"| LAKE
+    MAN -.->|"tells what to onboard"| LAKE
