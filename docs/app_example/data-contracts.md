@@ -85,7 +85,7 @@ sparse fieldsets, and errors.
 
 | Standard | What it is | Use for |
 |---|---|---|
-| **CloudEvents** (CNCF) | vendor-neutral **event envelope** (`id`, `source`, `type`, `specversion`, `time`, `subject`, `data`) | the standard wrapper for events across services/languages — maps directly onto our metadata contract |
+| **CloudEvents** (CNCF) | vendor-neutral **event envelope** (`id`, `source`, `type`, `specversion`, `time`, `subject`, `data`) | the **adopted** event envelope — the standard wrapper for events across services/languages; see [message-metadata-contract.md](./message-metadata-contract.md) |
 | **AsyncAPI** | description language for event-driven APIs (channels, messages) | "OpenAPI for messaging" — documents RabbitMQ channels/messages |
 | **Protobuf** (protobuf.dev) | IDL + binary serialization | cross-language event payloads with codegen (Ruby/Elixir/Java); already used in rate-alerts |
 | **Apache Avro** | schema + row serialization | streaming pipelines; strong schema evolution |
@@ -127,7 +127,7 @@ Community-standard building blocks — no need to invent:
 
 Compose established standards rather than a bespoke house style:
 
-- **HTTP responses** → **JSON:API** (recommended; see the two candidates above),
+- **HTTP responses** → **JSON:API** (adopted; see the two candidates above),
   validated with **JSON Schema**, errors as **RFC 9457 problem+json**. The flat
   house envelope is the fallback for services that need lightweight payloads.
 - **API description** → **OpenAPI**.

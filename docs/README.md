@@ -7,9 +7,8 @@ Index of everything under `docs/`.
 Design docs for running an event-sourced app without Rails (RubyEventStore on
 Postgres, Rack web + RabbitMQ/Sidekiq processes, AWS, OpenTelemetry). See the
 [section README](./app_example/README.md) for the guiding principle
-(keep it in one place until extraction is justified) and reading order.
+(keep it in one place until extraction is justified) and reading order. Full section overview: [app_example/README.md](./app_example/README.md).
 
-- [app_example/README.md](./app_example/README.md) — overview, guiding principle, reading order
 1. [app_example/running-res-without-rails.md](./app_example/running-res-without-rails.md) — RES on Postgres, streams, sync/async handlers, Kicks → Sidekiq, Rack web, prune vs archive
 2. [app_example/message-metadata-contract.md](./app_example/message-metadata-contract.md) — metadata across AMQP ↔ RES ↔ OpenTelemetry (maps to CloudEvents)
 3. [app_example/infrastructure.md](./app_example/infrastructure.md) — AWS/Terraform, ECS vs EKS, per-service independent autoscaling, security
