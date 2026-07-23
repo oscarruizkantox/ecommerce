@@ -61,6 +61,10 @@ extraction is chosen** — not a starting point and not an obligation.
    so migrating later is registering, not reprocessing; a separate archive RDS is
    rejected as lock-in.
 
+## Related
+
+- Domain diagrams (ecommerce, Mermaid): [`../diagrams/`](../diagrams/)
+
 ## Suggested reading order
 
 Start with (1) for the application, then (2) since the metadata contract underpins
