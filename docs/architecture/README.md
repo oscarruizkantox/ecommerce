@@ -1,11 +1,12 @@
-# App Example — Non-Rails RubyEventStore
+# Architecture — Event-Sourced Services (Non-Rails RubyEventStore)
 
-Design docs for running an event-sourced application **without Rails**: a
-framework-agnostic `RubyEventStore` core on Postgres, driven by a Rack web
-server and RabbitMQ/Sidekiq background processes, deployed on AWS and observed
-with OpenTelemetry.
+Architecture and design guidelines (with adopted decisions) for building
+event-sourced services: a framework-agnostic `RubyEventStore` core on Postgres,
+driven by a Rack web server and RabbitMQ/Sidekiq background processes, deployed on
+AWS and observed with OpenTelemetry — plus the shared contracts (API, metadata,
+cross-language) and data lifecycle (archival) that span services.
 
-The app is three Rails-free process types sharing one boot file:
+A service is three Rails-free process types sharing one boot file:
 
 - **web** — Puma + Rack + Sinatra: accepts requests, dispatches commands.
 - **consumer** — Kicks (RabbitMQ): ingress, hands off to Sidekiq.
